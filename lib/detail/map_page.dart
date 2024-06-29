@@ -22,36 +22,67 @@ class _MapScreenState extends State<MapScreen> {
 
   void _searchAndNavigate() async {
     if (_startController.text.isNotEmpty && _endController.text.isNotEmpty) {
-      var startResponse = await http.get(Uri.parse(
-          'https://api.mapbox.com/geocoding/v5/mapbox.places/${_startController.text}.json?access_token=pk.eyJ1Ijoic21pbHloeGMiLCJhIjoiY2x3aXpkbWExMHFwcTJrcHB1cGk0cHZ6cSJ9.ly840HMC2TwMAhCnhK4kmQ'));
-      var endResponse = await http.get(Uri.parse(
-          'https://api.mapbox.com/geocoding/v5/mapbox.places/${_endController.text}.json?access_token=pk.eyJ1Ijoic21pbHloeGMiLCJhIjoiY2x3aXpkbWExMHFwcTJrcHB1cGk0cHZ6cSJ9.ly840HMC2TwMAhCnhK4kmQ'));
+      await _handleSearch(
+          _startController.text, (location) => _startPoint = location);
+      await _handleSearch(
+          _endController.text, (location) => _endPoint = location);
 
-      var startLocation = json.decode(startResponse.body);
-      var endLocation = json.decode(endResponse.body);
+      if (_startPoint != null && _endPoint != null) {
+        // Move map to show both points (adjust manually)
+        _mapController.move(
+          lat_lng2.LatLng(
+            (_startPoint!.latitude + _endPoint!.latitude) / 2,
+            (_startPoint!.longitude + _endPoint!.longitude) / 2,
+          ),
+          13.0,
+        );
 
-      double startLat = startLocation['features'][0]['center'][1];
-      double startLng = startLocation['features'][0]['center'][0];
-      double endLat = endLocation['features'][0]['center'][1];
-      double endLng = endLocation['features'][0]['center'][0];
+        // Get the route and navigation steps
+        await _getPolylinePoints();
+        await _getNavigationSteps();
+      }
+    }
+  }
 
-      setState(() {
-        _startPoint = lat_lng2.LatLng(startLat, startLng);
-        _endPoint = lat_lng2.LatLng(endLat, endLng);
-      });
+  Future<void> _handleSearch(
+      String query, void Function(lat_lng2.LatLng) onLocationSelected) async {
+    var response = await http.get(Uri.parse(
+        'https://api.mapbox.com/geocoding/v5/mapbox.places/$query.json?access_token=pk.eyJ1Ijoic21pbHloeGMiLCJhIjoiY2x3aXpkbWExMHFwcTJrcHB1cGk0cHZ6cSJ9.ly840HMC2TwMAhCnhK4kmQ'));
+    var locationData = json.decode(response.body);
 
-      // Move map to show both points (adjust manually)
-      _mapController.move(
-        lat_lng2.LatLng(
-          (startLat + endLat) / 2,
-          (startLng + endLng) / 2,
-        ),
-        13.0,
+    List features = locationData['features'];
+
+    if (features.length > 1) {
+      // Multiple results found, show dialog for user to select one
+      List<Widget> addressOptions = features.map((feature) {
+        return SimpleDialogOption(
+          onPressed: () {
+            Navigator.pop(context, feature);
+          },
+          child: Text(feature['place_name']),
+        );
+      }).toList();
+
+      var selectedFeature = await showDialog(
+        context: context,
+        builder: (context) {
+          return SimpleDialog(
+            title: Text('Select an address'),
+            children: addressOptions,
+          );
+        },
       );
 
-      // Get the route and navigation steps
-      await _getPolylinePoints();
-      await _getNavigationSteps();
+      if (selectedFeature != null) {
+        double lat = selectedFeature['center'][1];
+        double lng = selectedFeature['center'][0];
+        onLocationSelected(lat_lng2.LatLng(lat, lng));
+      }
+    } else if (features.length == 1) {
+      // Only one result found, proceed with it
+      double lat = features[0]['center'][1];
+      double lng = features[0]['center'][0];
+      onLocationSelected(lat_lng2.LatLng(lat, lng));
     }
   }
 

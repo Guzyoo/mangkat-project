@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "670212465646",
+    "project_id": "mangkat-project-47ea6",
+    "storage_bucket": "mangkat-project-47ea6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:670212465646:android:22cf9768eb52ca388ee4ff",
+        "android_client_info": {
+          "package_name": "com.example.majalengka_angkutan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVv3a799mUu6ueiq_d6wdXs71bPOdTptE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

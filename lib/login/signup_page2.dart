@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:majalengka_angkutan/login/loginpage.dart';
+import 'package:majalengka_angkutan/menu/homepage.dart';
 import 'package:majalengka_angkutan/theme.dart';
 
 class SignupPage2 extends StatefulWidget {
@@ -10,6 +13,24 @@ class SignupPage2 extends StatefulWidget {
 }
 
 class _SignupPage2State extends State<SignupPage2> {
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _repeatpasswordController = TextEditingController();
+  TextEditingController _genderController = TextEditingController();
+  TextEditingController _phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _repeatpasswordController.dispose();
+    _genderController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,6 +120,7 @@ class _SignupPage2State extends State<SignupPage2> {
                               color: white1,
                               borderRadius: BorderRadius.circular(10)),
                           child: TextFormField(
+                            controller: _nameController,
                             style: light1,
                             decoration: InputDecoration(
                               hintText: 'Masukkan Nama Pengguna',
@@ -129,6 +151,7 @@ class _SignupPage2State extends State<SignupPage2> {
                               color: white1,
                               borderRadius: BorderRadius.circular(10)),
                           child: TextFormField(
+                            controller: _emailController,
                             style: light1,
                             decoration: InputDecoration(
                               hintText: 'Masukkan Email Anda',
@@ -159,6 +182,7 @@ class _SignupPage2State extends State<SignupPage2> {
                               color: white1,
                               borderRadius: BorderRadius.circular(10)),
                           child: TextFormField(
+                            controller: _passwordController,
                             style: light1,
                             decoration: InputDecoration(
                               hintText: 'Masukkan Kata Sandi Anda',
@@ -189,6 +213,7 @@ class _SignupPage2State extends State<SignupPage2> {
                               color: white1,
                               borderRadius: BorderRadius.circular(10)),
                           child: TextFormField(
+                            controller: _repeatpasswordController,
                             style: light1,
                             decoration: InputDecoration(
                               hintText: 'Konfirmasi Kata Sandi Anda',
@@ -219,6 +244,7 @@ class _SignupPage2State extends State<SignupPage2> {
                               color: white1,
                               borderRadius: BorderRadius.circular(10)),
                           child: TextFormField(
+                            controller: _genderController,
                             style: light1,
                             decoration: InputDecoration(
                               hintText: 'Masukkan Jenis Kelamin Anda',
@@ -249,6 +275,7 @@ class _SignupPage2State extends State<SignupPage2> {
                               color: white1,
                               borderRadius: BorderRadius.circular(10)),
                           child: TextFormField(
+                            controller: _phoneController,
                             style: light1,
                             decoration: InputDecoration(
                               hintText: 'Masukkan No. HP Anda',
@@ -260,20 +287,23 @@ class _SignupPage2State extends State<SignupPage2> {
                             ),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 30),
-                          child: Container(
-                            alignment: Alignment.center,
-                            width: 198,
-                            height: 37,
-                            decoration: BoxDecoration(
-                              color: blue1,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              "Lanjut",
-                              textAlign: TextAlign.center,
-                              style: semi3,
+                        GestureDetector(
+                          onTap: SignUp,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 30),
+                            child: Container(
+                              alignment: Alignment.center,
+                              width: 198,
+                              height: 37,
+                              decoration: BoxDecoration(
+                                color: blue1,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                "Lanjut",
+                                textAlign: TextAlign.center,
+                                style: semi3,
+                              ),
                             ),
                           ),
                         ),
@@ -315,5 +345,47 @@ class _SignupPage2State extends State<SignupPage2> {
         ),
       ),
     );
+  }
+
+  Future SignUp() async {
+    String name = _nameController.text.trim();
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+    String phone = _phoneController.text.trim();
+
+    if (passwordConfirmed()) {
+      try {
+        await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: email, password: password);
+        await addUserDetails(name, email, password, phone);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(),
+          ),
+        );
+      } catch (error) {
+        print("Error: ${error.toString()}");
+      }
+    }
+  }
+
+  bool passwordConfirmed() {
+    if (_passwordController.text.trim() ==
+        _repeatpasswordController.text.trim()) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future addUserDetails(
+      String name, String email, String password, String phone) async {
+    await FirebaseFirestore.instance.collection('user').add({
+      'name': name,
+      'email': email,
+      'password': password,
+      'phone': phone,
+    });
   }
 }

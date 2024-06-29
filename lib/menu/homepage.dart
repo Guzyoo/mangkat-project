@@ -188,26 +188,15 @@ class _HomePageState extends State<HomePage> {
                           padding: EdgeInsets.all(5),
                           child: Icon(Icons.search_outlined),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    MapScreen(), // Ganti dengan halaman tujuan
-                              ),
-                            );
-                          },
-                          child: Expanded(
-                            child: TextFormField(
-                              decoration: InputDecoration(
-                                hintText: 'Cari Tempat?',
-                                hintStyle: medium2,
-                                border: InputBorder.none,
-                                isDense: true,
-                                contentPadding: EdgeInsets.symmetric(
-                                    vertical: 5, horizontal: 10),
-                              ),
+                        Expanded(
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              hintText: 'Cari Tempat?',
+                              hintStyle: medium2,
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(
+                                  vertical: 5, horizontal: 10),
                             ),
                           ),
                         ),
@@ -363,10 +352,21 @@ class _HomePageState extends State<HomePage> {
                               style: reg5,
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 40),
-                            child: Icon(Icons.arrow_forward),
-                          )
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      MapScreen(), // Ganti dengan halaman tujuan
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 40),
+                              child: Icon(Icons.arrow_forward),
+                            ),
+                          ),
                         ],
                       ),
                     ),
